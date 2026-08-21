@@ -54,22 +54,17 @@ else
 endif
 VQ=@
 
-# Override this only if the host compiler is called something different
-BUILD_CC := $(DEVKITARM)/bin/arm-none-eabi-gcc 
+# BUILD_CC builds the helper programs that run on the machine doing the
+# build (xxd, convert_image, convert_font, split-messages), so it is the
+# native compiler rather than the cross compiler. Override it only if the
+# host compiler is called something different.
+BUILD_CC ?= cc
 
-MAKEROM := makerom
-#cc
-BUILD_CFLAGS = -g -W -Wall -Wundef -Wpointer-arith -Wcast-align \
+MAKEROM ?= makerom
+
+BUILD_CFLAGS = -g -O2 -W -Wall -Wundef -Wpointer-arith -Wcast-align \
 	-Wwrite-strings -Wmissing-declarations -Wuninitialized \
-	-Wno-unused-parameter  \
-	-I$(DEVKITPRO)/libctru/include \
-	-I$(DEVKITPRO)/portlibs/3ds/include \
-	-I$(DEVKITARM)/arm-none-eabi/include \
-	-I$(DEVKITARM)/lib/gcc/arm-none-eabi/13.2.0/include \
-	-DARM11 -D_3DS \
-	-D__3DS__ -march=armv6k -mtune=mpcore -mfloat-abi=hard -mtp=soft \
-	-g -Wall -O2 -mword-relocations
-# -nostdinc -nostdinc++
+	-Wno-unused-parameter
 # compute HOST, TARGET and SUBTARGET
 include frontends/Makefile.hts
 
@@ -203,7 +198,7 @@ $(eval $(call pkg_config_find_and_add_enabled,NSLOG,libnslog,LOG))
 
 
 # List of directories in which headers are searched for
-INCLUDE_DIRS := $(DEVKITPRO)/libctru/include $(DEVKITPRO)/devkitARM/arm-none-eabi/include $(DEVKITPRO)/portlibs/3ds/include . include $(OBJROOT)
+INCLUDE_DIRS := $(DEVKITPRO)/libctru/include $(DEVKITARM)/arm-none-eabi/include $(DEVKITPRO)/portlibs/3ds/include . include $(OBJROOT)
 # export the user agent format
 CFLAGS += -DNETSURF_UA_FORMAT_STRING=\"$(NETSURF_UA_FORMAT_STRING)\"
 CXXFLAGS += -DNETSURF_UA_FORMAT_STRING=\"$(NETSURF_UA_FORMAT_STRING)\"
@@ -351,13 +346,13 @@ IFLAGS = $(addprefix -I,$(INCLUDE_DIRS))
 $(EXETARGET): $(OBJECTS) $(RESOURCES) $(MESSAGES) tools/linktrace-to-depfile.pl
 	$(VQ)echo "    LINK: $(EXETARGET)"
 ifneq ($(TARGET),riscos)
-	$(BUILD_CC) -o $(EXETARGET) $(OBJECTS) $(LDFLAGS) -D__3DS__ -march=armv6k -mtune=mpcore -mfloat-abi=hard -mtp=soft > $(DEPROOT)/link-raw.d
+	$(Q)$(CC) -o $(EXETARGET) $(OBJECTS) $(LDFLAGS) > $(DEPROOT)/link-raw.d
 else
 	@# RISC OS targets are a bit special: we need to convert ELF -> AIF
   ifeq ($(SUBTARGET),-aof)
-	$(Q)$(BUILD_CC) -o $(EXETARGET) $(OBJECTS) $(LDFLAGS) -D__3DS__ -march=armv6k -mtune=mpcore -mfloat-abi=hard -mtp=soft > $(DEPROOT)/link-raw.d
+	$(Q)$(CC) -o $(EXETARGET) $(OBJECTS) $(LDFLAGS) > $(DEPROOT)/link-raw.d
   else
-	$(Q)$(CXX) -o $(EXETARGET:,ff8=,e1f) $(OBJECTS) $(LDFLAGS) -D__3DS__ -march=armv6k -mtune=mpcore -mfloat-abi=hard -mtp=soft > $(DEPROOT)/link-raw.d
+	$(Q)$(CXX) -o $(EXETARGET:,ff8=,e1f) $(OBJECTS) $(LDFLAGS) > $(DEPROOT)/link-raw.d
 	$(Q)$(ELF2AIF) $(EXETARGET:,ff8=,e1f) $(EXETARGET)
 	$(Q)$(RM) $(EXETARGET:,ff8=,e1f)
   endif
