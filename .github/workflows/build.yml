@@ -14,7 +14,7 @@ permissions:
   contents: read
 
 env:
-  MAKEROM_VERSION: v0.19.0
+  MAKEROM_VERSION: v0.18.4
 
 jobs:
   build:
@@ -41,6 +41,7 @@ jobs:
           curl -fsSL -o /tmp/makerom.zip "https://github.com/3DSGuy/Project_CTR/releases/download/makerom-${MAKEROM_VERSION}/makerom-${MAKEROM_VERSION}-ubuntu_x86_64.zip"
           unzip -o -j /tmp/makerom.zip makerom -d /usr/local/bin
           chmod +x /usr/local/bin/makerom
+          makerom -v 2>&1 | head -n 2 || true
 
       - name: Show toolchain
         run: |
