@@ -1,0 +1,71 @@
+name: Build
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  MAKEROM_VERSION: v0.19.0
+
+jobs:
+  build:
+    name: 3DS (3dsx + cia)
+    runs-on: ubuntu-latest
+    container: devkitpro/devkitarm:latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install host tools
+        run: |
+          apt-get update -qq
+          apt-get install -y --no-install-recommends curl unzip zip
+
+      - name: Install 3DS portlibs
+        run: |
+          dkp-pacman -Sy --noconfirm
+          dkp-pacman -S --noconfirm --needed \
+            3ds-sdl \
+            3ds-mbedtls \
+            3ds-curl \
+            3ds-libpng \
+            3ds-libjpeg-turbo \
+            3ds-libiconv \
+            3ds-freetype \
+            3ds-zlib
+
+      - name: Install makerom
+        run: |
+          curl -fsSL -o /tmp/makerom.zip \
+            "https://github.com/3DSGuy/Project_CTR/releases/download/makerom-${MAKEROM_VERSION}/makerom-${MAKEROM_VERSION}-ubuntu_x86_64.zip"
+          unzip -o -j /tmp/makerom.zip makerom -d /usr/local/bin
+          chmod +x /usr/local/bin/makerom
+          makerom -help | head -n 2 || true
+
+      - name: Build
+        run: make -j"$(nproc)"
+
+      - name: Stage artifacts
+        run: |
+          mkdir -p dist
+          cp netsurf/nsfb.3dsx dist/netsurf.3dsx
+          cp netsurf/nsfb.cia dist/netsurf.cia
+          cp netsurf/nsfb_himem.cia dist/netsurf_himem.cia
+          ls -l dist
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: netsurf-3ds-${{ github.sha }}
+          path: dist/
+          if-no-files-found: error
