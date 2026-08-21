@@ -28,37 +28,33 @@ else
 endif
 
 
+# These four tools run on the machine doing the build, so they are
+# compiled with the native BUILD_CC rather than the 3DS cross compiler.
+
 # Build tool to convert file to comiled data
 #
 $(TOOLROOT)/xxd: tools/xxd.c $(TOOLROOT)/created
 	$(VQ)echo "BUILD CC: $@"
-	$(Q)cp ../tools/xxd $(TOOLROOT)/xxd
-# $(Q)$(BUILD_CC) $(BUILD_CFLAGS) -o $@ $<
-# $(BUILD_LDFLAGS)
+	$(Q)$(BUILD_CC) $(BUILD_CFLAGS) -o $@ $< $(BUILD_LDFLAGS)
 
 
 # Build tool to filter messages
 #
 $(TOOLROOT)/split-messages: tools/split-messages.c $(TOOLROOT)/created
 	$(VQ)echo "BUILD CC: $@"
-	$(Q)cp ../tools/split-messages $(TOOLROOT)/split-messages
-#$(BUILD_CC) $(BUILD_CFLAGS) -I. -o $@ $<  -L$(DEVKITPRO)/libctru/lib -L$(DEVKITPRO)/portlibs/3ds/lib -lz
-# $(BUILD_LDFLAGS)
+	$(Q)$(BUILD_CC) $(BUILD_CFLAGS) -I. -o $@ $< $(BUILD_LDFLAGS) -lz
 
 
 # Build tool to convert image bitmaps to source code.
 #
 $(TOOLROOT)/convert_image: tools/convert_image.c $(TOOLROOT)/created
 	$(VQ)echo "BUILD CC: $@"
-	$(Q)cp ../tools/convert_image $(TOOLROOT)/convert_image
-#$(BUILD_CC) $(BUILD_CFLAGS) $(BUILD_LIBPNG_CFLAGS) -o $@ $<  -L$(DEVKITPRO)/libctru/lib -L$(DEVKITPRO)/portlibs/3ds/lib $(BUILD_LIBPNG_LDFLAGS)
-# $(BUILD_LDFLAGS)
+	$(Q)$(BUILD_CC) $(BUILD_CFLAGS) $(BUILD_LIBPNG_CFLAGS) -o $@ $< $(BUILD_LIBPNG_LDFLAGS) $(BUILD_LDFLAGS)
 
 # Build too to perform font conversion
 $(TOOLROOT)/convert_font: tools/convert_font.c $(TOOLROOT)/created
 	$(VQ)echo "BUILD CC: $@"
-	$(Q)cp ../tools/convert_font $(TOOLROOT)/convert_font
-#$(BUILD_CC) $(BUILD_CFLAGS) -o $@ $< -L$(DEVKITPRO)/libctru/lib -L$(DEVKITPRO)/portlibs/3ds/lib
+	$(Q)$(BUILD_CC) $(BUILD_CFLAGS) -o $@ $< $(BUILD_LDFLAGS)
 
 # idna
 #

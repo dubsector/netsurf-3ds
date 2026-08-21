@@ -29,24 +29,20 @@ endif
 # would like these flags but gcc earlier than 4.4 fail
 #-pedantic -Wno-overlength-strings # For nsglobe.c
 
+ifeq ($(DEVKITPRO),)
+  $(error DEVKITPRO is not set; source the devkitPro environment first)
+endif
+ifeq ($(DEVKITARM),)
+  $(error DEVKITARM is not set; source the devkitPro environment first)
+endif
+
 CFLAGS := -D_BSD_SOURCE -D_DEFAULT_SOURCE -D_POSIX_C_SOURCE=200112L \
 	-I$(CURDIR)/include/ -I$(CURDIR)/src \
-	-I/opt/devkitpro/portlibs/3ds/include \
-	-I/opt/devkitpro/libctru/include \
-  -I/opt/devkitpro/devkitARM/arm-none-eabi/include/ \
-  -D__3DS__ -D_3DS -march=armv6k -mtune=mpcore -mfloat-abi=hard -mtp=soft\
+	-I$(DEVKITPRO)/portlibs/3ds/include \
+	-I$(DEVKITPRO)/libctru/include \
+	-I$(DEVKITARM)/arm-none-eabi/include/ \
+	-D__3DS__ -D_3DS -march=armv6k -mtune=mpcore -mfloat-abi=hard -mtp=soft\
 	$(WARNFLAGS) $(CFLAGS)
-  # -I/home/coderman64/Projects/3ds/netsurf3ds/c3d140/include \
-  # -I/home/coderman64/Projects/3ds/netsurf3ds/sdl3ds/include \
-  # -I/opt/devkitpro/devkitARM/arm-none-eabi/include/machine/ \
-
-# CFLAGS += $(shell /home/coderman64/Projects/3ds/netsurf3ds/sdl3ds/bin/sdl-config --cflags)
-# CFLAGS += -L/home/coderman64/Projects/3ds/netsurf3ds/sdl3ds/lib \
-#     -L/opt/devkitpro/portlibs/3ds/lib/ \
-#     -L/opt/devkitpro/portlibs/3ds \
-# 	  -L/opt/devkitpro/libctru/lib \
-#     -lctru -lSDL -lcitro3d -lm
-#$(shell /home/coderman64/Projects/3ds/netsurf3ds/sdl3ds/bin/sdl-config --libs)
 
 # Cope with gcc 2
 ifneq ($(GCCVER),2)
@@ -67,10 +63,6 @@ NSFB_VNC_AVAILABLE = no
 NSFB_SDL_AVAILABLE = yes
 NSFB_XCB_AVAILABLE = no
 NSFB_WLD_AVAILABLE = no
-
-# CFLAGS += $(shell /home/coderman64/Projects/3ds/netsurf3ds/sdl3ds/bin/sdl-config --cflags)
-# CFLAGS += $(shell /home/coderman64/Projects/3ds/netsurf3ds/sdl3ds/bin/sdl-config --cflags)
-# LDFLAGS += $(shell /home/coderman64/Projects/3ds/netsurf3ds/sdl3ds/bin/sdl-config --libs)
 
 
 # Flags and setup for each support library
