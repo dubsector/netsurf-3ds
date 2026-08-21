@@ -29,7 +29,12 @@ jobs:
       - name: Install host tools
         run: |
           apt-get update -qq
-          apt-get install -y --no-install-recommends curl unzip zip
+          apt-get install -y --no-install-recommends curl unzip zip debianutils
+
+      - name: Put the devkitARM toolchain on PATH
+        run: |
+          echo "$DEVKITARM/bin" >> "$GITHUB_PATH"
+          echo "$DEVKITPRO/tools/bin" >> "$GITHUB_PATH"
 
       - name: Install 3DS portlibs
         run: |
@@ -51,6 +56,14 @@ jobs:
           unzip -o -j /tmp/makerom.zip makerom -d /usr/local/bin
           chmod +x /usr/local/bin/makerom
           makerom -help | head -n 2 || true
+
+      - name: Show toolchain
+        run: |
+          echo "DEVKITPRO=$DEVKITPRO"
+          echo "DEVKITARM=$DEVKITARM"
+          which arm-none-eabi-gcc
+          arm-none-eabi-gcc --version | head -n 1
+          which 3dsxtool makerom
 
       - name: Build
         run: make -j"$(nproc)"
