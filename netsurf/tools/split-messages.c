@@ -458,7 +458,7 @@ fatmessages_read(struct param *param, struct trnsltn_entry **tlist)
 	}
 
 	while (1) {
-		linelen = __getline(&line, &linealloc, infile);
+		linelen = getline(&line, &linealloc, infile);
 		if (linelen == -1) {
 			break;
 		}
