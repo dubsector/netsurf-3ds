@@ -36,18 +36,13 @@ jobs:
           echo "$DEVKITARM/bin" >> "$GITHUB_PATH"
           echo "$DEVKITPRO/tools/bin" >> "$GITHUB_PATH"
 
-      - name: Install 3DS portlibs
+      - name: Inspect the 3DS portlibs shipped in the image
         run: |
-          dkp-pacman -Sy --noconfirm
-          dkp-pacman -S --noconfirm --needed \
-            3ds-sdl \
-            3ds-mbedtls \
-            3ds-curl \
-            3ds-libpng \
-            3ds-libjpeg-turbo \
-            3ds-libiconv \
-            3ds-freetype \
-            3ds-zlib
+          dkp-pacman -Q || true
+          echo "--- pkgconfig ---"
+          ls "$DEVKITPRO/portlibs/3ds/lib/pkgconfig" || true
+          echo "--- lib ---"
+          ls "$DEVKITPRO/portlibs/3ds/lib" || true
 
       - name: Install makerom
         run: |
